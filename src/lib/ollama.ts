@@ -78,11 +78,17 @@ export async function diagnoseConnection(baseUrl = domain.ollama.baseUrl): Promi
 export function connectionHelp(problem: ConnectionProblem, model: string): string {
   const origin = location.origin;
   if (problem === "down") {
+    // 원격 페이지에서 루프백 주소로 가는 요청 자체를 막는 브라우저·확장이 있다.
+    // 그때도 여기로 오는데, "Ollama가 꺼져 있다"고 단정하면 켜 놓은 사람은
+    // 무엇을 고쳐야 할지 알 수 없다. 두 가능성을 함께 적는다.
+    const remote = location.protocol === "https:";
     return [
-      "Ollama가 실행되고 있지 않은 것 같아요.",
+      "Ollama에 닿지 못했어요. 두 가지 중 하나입니다.",
       "",
-      `Ollama를 켜고 \`ollama pull ${model}\` 로 모델을 받아 두세요.`,
-      "켜져 있는데도 이 말이 나오면 방화벽이 11434 포트를 막고 있는지 봐 주세요.",
+      `1. Ollama가 꺼져 있어요 → 켜고 \`ollama pull ${model}\` 로 모델을 받아 두세요.`,
+      remote
+        ? "2. 브라우저나 확장 프로그램이 이 페이지에서 내 컴퓨터로 가는 요청을 막고 있어요\n   → 다른 브라우저에서 열어 보시거나, 광고 차단기 같은 확장을 잠시 꺼 보세요."
+        : "2. 방화벽이 11434 포트를 막고 있을 수 있어요.",
     ].join("\n");
   }
   return [
