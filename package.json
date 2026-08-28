@@ -1,0 +1,32 @@
+{
+  "name": "chatbot_mq1",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "embed": "node scripts/build-chunks.mjs",
+    "deploy": "npm run build && npx gh-pages -d dist",
+    "verify:rubrics": "node scripts/verify-rubrics.mjs",
+    "probe": "node scripts/probe-retrieval.mjs",
+    "measure": "esbuild scripts/measure.ts --bundle --platform=node --format=esm --target=node22 --external:@huggingface/transformers --outfile=scripts/.measure.mjs --log-level=warning && node scripts/.measure.mjs"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^4.2.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.1.0",
+    "esbuild": "^0.28.2",
+    "oxlint": "^1.79.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.2.2"
+  }
+}

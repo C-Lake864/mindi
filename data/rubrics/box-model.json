@@ -1,0 +1,98 @@
+{
+  "$comment": "Group B 개념. PRD 6.5 에 따라 코드 스니펫과 예상 결과를 함께 제시하고 '왜 이렇게 되는가'를 묻는다. 맥락 없이 '박스 모델을 설명해 보세요'로 물으면 Group A와 똑같은 추상 설명 과제가 되어 선정 이유가 무효화된다.",
+  "id": "box-model",
+  "title": "CSS 박스 모델",
+  "group": "B",
+  "version": "1.1.0",
+  "authoredAt": "2026-08-28",
+  "selfReviewedAt": null,
+  "source": {
+    "title": "박스 모델",
+    "url": "https://developer.mozilla.org/ko/docs/Learn_web_development/Core/Styling_basics/Box_model",
+    "verifiedAt": "2026-08-28"
+  },
+  "definition": "요소가 차지하는 크기를 콘텐츠·패딩·테두리·여백의 층으로 계산하는 규칙. box-sizing 값에 따라 width 가 가리키는 대상이 달라진다.",
+  "prompt": {
+    "kind": "explain-code",
+    "question": "CSS 박스 모델이 무엇이고, 요소가 화면에서 차지하는 크기가 어떻게 정해지는지 설명해 보세요.",
+    "easedQuestion": "박스를 이루는 층이 무엇무엇인지부터 떠올려 보셔도 좋아요.",
+    "exampleLabel": "막히면 이 예를 보세요",
+    "snippet": ".box {\n  width: 300px;\n  padding: 20px;\n  border: 5px solid;\n}",
+    "expected": "이 요소는 화면에서 350px을 차지합니다."
+  },
+  "elements": [
+    {
+      "id": "RB-B1",
+      "name": "박스의 네 층",
+      "required": true,
+      "criterion": "콘텐츠·패딩·테두리·여백 중 최소 세 개를 서로 다른 층으로 구분해 서술한다. 이름이 정확하지 않아도 '안쪽 여백'과 '바깥 여백'을 구분하면 이해로 본다.",
+      "supportingQuote": "여백은 가장 바깥 쪽 레이어로 콘텐츠와 패딩, 테두리를 둘러싸면서 당 박스와 다른 요소 사이 공백 역할을 합니다",
+      "anchor": "#box의_구성"
+    },
+    {
+      "id": "RB-B2",
+      "name": "width 가 가리키는 대상",
+      "required": true,
+      "criterion": "표준 모델에서 width 가 콘텐츠 박스의 너비를 정한다는 점을 서술한다.",
+      "supportingQuote": "표준 박스 모델에서 box에서 width 와 height 를 부여하면 content box 의 너비와 높이가 정의됩니다",
+      "anchor": "#표준_css_박스_모델"
+    },
+    {
+      "id": "RB-B3",
+      "name": "패딩·테두리의 가산",
+      "required": true,
+      "criterion": "패딩과 테두리가 width 에 더해져 실제 점유 크기가 된다는 점을 서술한다. 예의 숫자로 보여도 되고 말로만 해도 된다.",
+      "supportingQuote": "패딩과 테두리는 박스의 너비와 높이에 추가되여 박스가 점유하는 전체 크기가 정해집니다",
+      "anchor": "#표준_css_박스_모델"
+    },
+    {
+      "id": "RB-B4",
+      "name": "여백의 제외",
+      "required": true,
+      "criterion": "여백은 박스의 실제 크기에 포함되지 않는다는 점을 서술한다.",
+      "supportingQuote": "여백은 박스의 실제 크기에 포함되지 않습니다",
+      "anchor": "#표준_css_박스_모델"
+    },
+    {
+      "id": "RB-B5",
+      "name": "대체 모델과 box-sizing",
+      "required": false,
+      "criterion": "box-sizing: border-box 를 쓰면 width 가 테두리까지 포함한 너비가 된다는 점을 서술한다.",
+      "supportingQuote": "이 모델을 사용한다면 너비는 페이지에서 표시되는 박스 너비이므로 콘텐츠 영역 너비는 너비에서 패딩 및 테두리 너비를 뺀 너비입니다",
+      "anchor": "#대체_css_박스_모델",
+      "note": "선택 요소로 둔 이유: 표준 모델만으로 크기 계산을 온전히 설명할 수 있다. 필수로 두면 원문 밖 지식을 요구하게 된다."
+    }
+  ],
+  "misconceptions": [
+    {
+      "id": "MC-B1",
+      "statement": "width 가 요소가 차지하는 최종 너비다 (패딩·테두리가 안쪽으로 들어간다고 봄)",
+      "conflictsWith": [
+        "RB-B2",
+        "RB-B3"
+      ],
+      "correctionAnchor": "#표준_css_박스_모델",
+      "origin": "추정"
+    },
+    {
+      "id": "MC-B2",
+      "statement": "여백도 박스의 크기에 포함된다",
+      "conflictsWith": [
+        "RB-B4"
+      ],
+      "correctionAnchor": "#표준_css_박스_모델",
+      "origin": "추정"
+    },
+    {
+      "id": "MC-B3",
+      "statement": "패딩과 여백을 같은 것으로 본다",
+      "conflictsWith": [
+        "RB-B1",
+        "RB-B4"
+      ],
+      "correctionAnchor": "#box의_구성",
+      "origin": "추정"
+    }
+  ],
+  "misconceptionNote": "origin 이 '추정'인 항목은 Phase 0' 에서 수집한 실제 학습자 답변으로 교체한다 (PRD 6.4 원칙 4)."
+}

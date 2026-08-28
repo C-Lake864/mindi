@@ -1,0 +1,532 @@
+{
+  "measuredAt": "2026-08-28T08:49:24.476Z",
+  "setVersion": "1.0.0",
+  "model": "qwen3:4b",
+  "chunkCount": 47,
+  "scope": {
+    "accept": 0.65,
+    "ask": 0.58
+  },
+  "metrics": {
+    "fp": [],
+    "notCredited": [
+      "B-2"
+    ],
+    "missedDefects": [],
+    "overCredited": [
+      "H-6/RB-A5"
+    ],
+    "misconceptionCaught": [
+      "H-7",
+      "H-8",
+      "B-7",
+      "B-8"
+    ],
+    "scopeRefused": [
+      "H-9",
+      "B-9"
+    ],
+    "correctAchieved": [
+      "H-1",
+      "B-1"
+    ],
+    "consistency": {
+      "unstable": 0,
+      "cells": 16,
+      "rows": [
+        {
+          "id": "H-1",
+          "unstable": 0,
+          "cells": 6,
+          "detail": []
+        },
+        {
+          "id": "H-5",
+          "unstable": 0,
+          "cells": 6,
+          "detail": []
+        },
+        {
+          "id": "B-1",
+          "unstable": 0,
+          "cells": 4,
+          "detail": []
+        }
+      ]
+    }
+  },
+  "results": [
+    {
+      "id": "H-1",
+      "label": "correct",
+      "topCosine": 0.8552360263024658,
+      "band": "안",
+      "refused": false,
+      "achieved": true,
+      "downgraded": 0,
+      "states": [
+        "RB-A1:이해",
+        "RB-A2:이해",
+        "RB-A3:이해",
+        "RB-A4:이해",
+        "RB-A5:이해",
+        "RB-A6:이해",
+        "RB-A7:미도달",
+        "RB-A8:미도달"
+      ],
+      "misconceptions": [],
+      "judge": {
+        "grounded": true,
+        "cited": true,
+        "refusal": false,
+        "relevant": true,
+        "complete": true,
+        "verdict": "pass",
+        "reason": "진단기가 클라이언트, 서버, 요청, 응답, 요청 시작 주체, 관계 서술을 모두 루브릭 요소와 원문 청크에서 근거로 판정했으며 학습자 발화 구간이 명확히 연결되었습니다."
+      }
+    },
+    {
+      "id": "H-2",
+      "label": "paraphrase",
+      "topCosine": 0.7350474636157563,
+      "band": "안",
+      "refused": false,
+      "achieved": true,
+      "downgraded": 0,
+      "states": [
+        "RB-A1:이해",
+        "RB-A2:이해",
+        "RB-A3:이해",
+        "RB-A4:이해",
+        "RB-A5:이해",
+        "RB-A6:이해",
+        "RB-A7:미도달",
+        "RB-A8:미도달"
+      ],
+      "misconceptions": [],
+      "judge": {
+        "grounded": true,
+        "cited": true,
+        "refusal": false,
+        "relevant": true,
+        "complete": true,
+        "verdict": "pass",
+        "reason": "진단기가 클라이언트를 `이해`로 주었으나 학습자 발화에 주체가 없어 근거가 부족합니다"
+      }
+    },
+    {
+      "id": "H-3",
+      "label": "paraphrase",
+      "topCosine": 0.704607336258337,
+      "band": "안",
+      "refused": false,
+      "achieved": true,
+      "downgraded": 0,
+      "states": [
+        "RB-A1:이해",
+        "RB-A2:이해",
+        "RB-A3:이해",
+        "RB-A4:이해",
+        "RB-A5:이해",
+        "RB-A6:이해",
+        "RB-A7:미도달",
+        "RB-A8:미도달"
+      ],
+      "misconceptions": [],
+      "judge": {
+        "grounded": true,
+        "cited": true,
+        "refusal": false,
+        "relevant": true,
+        "complete": true,
+        "verdict": "pass",
+        "reason": "진단기가 클라이언트와 서버의 역할을 정확히 파악했으며, 학습자 발화에서 근거를 제시한 모든 요소가 루브릭에 맞춰 판정되었습니다."
+      }
+    },
+    {
+      "id": "H-4",
+      "label": "paraphrase",
+      "topCosine": 0.7808819738092214,
+      "band": "안",
+      "refused": false,
+      "achieved": true,
+      "downgraded": 0,
+      "states": [
+        "RB-A1:이해",
+        "RB-A2:이해",
+        "RB-A3:이해",
+        "RB-A4:이해",
+        "RB-A5:이해",
+        "RB-A6:이해",
+        "RB-A7:미도달",
+        "RB-A8:미도달"
+      ],
+      "misconceptions": [],
+      "judge": {
+        "grounded": true,
+        "cited": true,
+        "refusal": false,
+        "relevant": true,
+        "complete": true,
+        "verdict": "pass",
+        "reason": "진단기가 클라이언트를 `이해`로 주었으나 학습자 발화에 주체가 없어 근거가 부족합니다"
+      }
+    },
+    {
+      "id": "H-5",
+      "label": "partial",
+      "topCosine": 0.817891910693015,
+      "band": "안",
+      "refused": false,
+      "achieved": false,
+      "downgraded": 0,
+      "states": [
+        "RB-A1:확인필요",
+        "RB-A2:미도달",
+        "RB-A3:확인필요",
+        "RB-A4:이해",
+        "RB-A5:확인필요",
+        "RB-A6:부분",
+        "RB-A7:미도달",
+        "RB-A8:미도달"
+      ],
+      "misconceptions": [],
+      "judge": {
+        "grounded": true,
+        "cited": true,
+        "refusal": false,
+        "relevant": true,
+        "complete": true,
+        "verdict": "pass",
+        "reason": "진단기가 클라이언트를 `이해`로 주었으나 학습자 발화에 주체가 없어 근거가 부족합니다."
+      }
+    },
+    {
+      "id": "H-6",
+      "label": "partial",
+      "topCosine": 0.7331095490907906,
+      "band": "안",
+      "refused": false,
+      "achieved": false,
+      "downgraded": 0,
+      "states": [
+        "RB-A1:이해",
+        "RB-A2:미도달",
+        "RB-A3:미도달",
+        "RB-A4:미도달",
+        "RB-A5:이해",
+        "RB-A6:미도달",
+        "RB-A7:미도달",
+        "RB-A8:미도달"
+      ],
+      "misconceptions": [],
+      "judge": {
+        "grounded": true,
+        "cited": true,
+        "refusal": false,
+        "relevant": true,
+        "complete": true,
+        "verdict": "pass",
+        "reason": "진단기가 클라이언트를 `이해`로 주었으나 학습자 발화에 주체가 없어 근거가 부족합니다"
+      }
+    },
+    {
+      "id": "H-7",
+      "label": "misconception",
+      "topCosine": 0.7864801579679922,
+      "band": "안",
+      "refused": false,
+      "achieved": false,
+      "downgraded": 0,
+      "states": [
+        "RB-A1:미도달",
+        "RB-A2:미도달",
+        "RB-A3:미도달",
+        "RB-A4:미도달",
+        "RB-A5:미도달",
+        "RB-A6:미도달",
+        "RB-A7:미도달",
+        "RB-A8:미도달"
+      ],
+      "misconceptions": [
+        "서버가 브라우저한테 요청을 보내면"
+      ],
+      "judge": {
+        "grounded": true,
+        "cited": true,
+        "refusal": false,
+        "relevant": true,
+        "complete": true,
+        "verdict": "pass",
+        "reason": "진단기가 클라이언트를 `이해`로 주었으나 학습자 발화에 주체가 없어 근거가 부족합니다"
+      }
+    },
+    {
+      "id": "H-8",
+      "label": "misconception",
+      "topCosine": 0.7655866203956764,
+      "band": "안",
+      "refused": false,
+      "achieved": false,
+      "downgraded": 0,
+      "states": [
+        "RB-A1:이해",
+        "RB-A2:이해",
+        "RB-A3:이해",
+        "RB-A4:이해",
+        "RB-A5:이해",
+        "RB-A6:이해",
+        "RB-A7:미도달",
+        "RB-A8:미도달"
+      ],
+      "misconceptions": [
+        "서버가 이전에 뭘 했는지 다 기억하고 있어서 두 번째 요청부터는 알아서 처리해 줘요"
+      ],
+      "judge": {
+        "grounded": true,
+        "cited": true,
+        "refusal": false,
+        "relevant": true,
+        "complete": true,
+        "verdict": "pass",
+        "reason": "진단기가 클라이언트를 `이해`로 주었으나 학습자 발화에 주체가 없어 근거가 부족합니다"
+      }
+    },
+    {
+      "id": "H-9",
+      "label": "outofscope",
+      "topCosine": 0.5268316810060234,
+      "band": "밖",
+      "refused": true,
+      "achieved": false,
+      "downgraded": 0,
+      "judge": null
+    },
+    {
+      "id": "B-1",
+      "label": "correct",
+      "topCosine": 0.8841640475439585,
+      "band": "안",
+      "refused": false,
+      "achieved": true,
+      "downgraded": 0,
+      "states": [
+        "RB-B1:이해",
+        "RB-B2:이해",
+        "RB-B3:이해",
+        "RB-B4:이해",
+        "RB-B5:미도달"
+      ],
+      "misconceptions": [],
+      "judge": {
+        "grounded": true,
+        "cited": true,
+        "refusal": false,
+        "relevant": true,
+        "complete": true,
+        "verdict": "pass",
+        "reason": "진단기가 <루브릭>의 모든 필수 요소를 학습자 발화 구간으로 근거를 댔으며, 학습자가 실제로 말한 내용에 대한 진단입니다."
+      }
+    },
+    {
+      "id": "B-2",
+      "label": "paraphrase",
+      "topCosine": 0.7378504460969373,
+      "band": "안",
+      "refused": false,
+      "achieved": false,
+      "downgraded": 2,
+      "states": [
+        "RB-B1:확인필요",
+        "RB-B2:이해",
+        "RB-B3:확인필요",
+        "RB-B4:이해",
+        "RB-B5:미도달"
+      ],
+      "misconceptions": [],
+      "judge": {
+        "grounded": true,
+        "cited": true,
+        "refusal": false,
+        "relevant": true,
+        "complete": true,
+        "verdict": "pass",
+        "reason": "진단기가 학습자 발화에서 '300은 글자가 들어가는 안쪽 칸만 300'과 '바깥 여백은 상자 밖의 공간이라 상자 크기에는 안 들어갑니다'를 근거로 RB-B2와 RB-B4를 '이해'로 판정했으며, 나머지 요소는 '확인필요'로 보류하거나 미도달로 처리했으므로 루브릭 요소와 원문 청크 내에서 근거를 댔습니다."
+      }
+    },
+    {
+      "id": "B-3",
+      "label": "paraphrase",
+      "topCosine": 0.7398969478858325,
+      "band": "안",
+      "refused": false,
+      "achieved": true,
+      "downgraded": 0,
+      "states": [
+        "RB-B1:이해",
+        "RB-B2:이해",
+        "RB-B3:이해",
+        "RB-B4:이해",
+        "RB-B5:미도달"
+      ],
+      "misconceptions": [],
+      "judge": {
+        "grounded": true,
+        "cited": true,
+        "refusal": false,
+        "relevant": true,
+        "complete": true,
+        "verdict": "pass",
+        "reason": "진단기가 학습자 발화에서 각 요소에 대한 근거를 명확히 제시했으며, 루브릭 요소를 모두 충족시켰습니다."
+      }
+    },
+    {
+      "id": "B-4",
+      "label": "paraphrase",
+      "topCosine": 0.8125061073805577,
+      "band": "안",
+      "refused": false,
+      "achieved": true,
+      "downgraded": 0,
+      "states": [
+        "RB-B1:이해",
+        "RB-B2:이해",
+        "RB-B3:이해",
+        "RB-B4:이해",
+        "RB-B5:미도달"
+      ],
+      "misconceptions": [],
+      "judge": {
+        "grounded": true,
+        "cited": true,
+        "refusal": false,
+        "relevant": true,
+        "complete": true,
+        "verdict": "pass",
+        "reason": "진단기가 학습자 발화에서 '안쪽 여백', '바깥 여백'을 정확히 구분하고, width가 콘텐츠 박스의 너비를 가리키는 점을 서술하며 패딩과 테두리가 점유 크기에서 더해지는 점을 숫자로 설명했으므로 루브릭 요소를 모두 충족시켰습니다."
+      }
+    },
+    {
+      "id": "B-5",
+      "label": "partial",
+      "topCosine": 0.7022779363569743,
+      "band": "안",
+      "refused": false,
+      "achieved": false,
+      "downgraded": 0,
+      "states": [
+        "RB-B1:미도달",
+        "RB-B2:미도달",
+        "RB-B3:이해",
+        "RB-B4:미도달",
+        "RB-B5:미도달"
+      ],
+      "misconceptions": [
+        "패딩이랑 보더가 더해져서 350px이 돼요."
+      ],
+      "judge": {
+        "grounded": true,
+        "cited": true,
+        "refusal": false,
+        "relevant": true,
+        "complete": true,
+        "verdict": "pass",
+        "reason": "진단기가 학습자 발화 '패딩이랑 보더가 더해져서 350px이 돼요.'를 RB-B3 패딩·테두리의 가산으로 '이해'로 판정했으며, 근거로 청크 MD-034를 인용했습니다."
+      }
+    },
+    {
+      "id": "B-6",
+      "label": "partial",
+      "topCosine": 0.7210968721839046,
+      "band": "안",
+      "refused": false,
+      "achieved": false,
+      "downgraded": 0,
+      "states": [
+        "RB-B1:이해",
+        "RB-B2:미도달",
+        "RB-B3:미도달",
+        "RB-B4:미도달",
+        "RB-B5:미도달"
+      ],
+      "misconceptions": [
+        "박스는 콘텐츠, 패딩, 보더, 마진 네 가지로 이루어져 있어요."
+      ],
+      "judge": {
+        "grounded": true,
+        "cited": true,
+        "refusal": false,
+        "relevant": true,
+        "complete": true,
+        "verdict": "pass",
+        "reason": "진단기가 클라이언트를 `이해`로 주었으나 학습자 발화에 주체가 없어 근거가 부족합니다"
+      }
+    },
+    {
+      "id": "B-7",
+      "label": "misconception",
+      "topCosine": 0.7801091161133551,
+      "band": "안",
+      "refused": false,
+      "achieved": false,
+      "downgraded": 0,
+      "states": [
+        "RB-B1:이해",
+        "RB-B2:미도달",
+        "RB-B3:미도달",
+        "RB-B4:미도달",
+        "RB-B5:미도달"
+      ],
+      "misconceptions": [
+        "패딩이랑 테두리는 그 300px 안쪽에 들어가요"
+      ],
+      "judge": {
+        "grounded": true,
+        "cited": true,
+        "refusal": false,
+        "relevant": true,
+        "complete": true,
+        "verdict": "pass",
+        "reason": "진단기가 학습자 발화에 근거를 내리고, 루브릭 필수 요소를 모두 판정했으며, 오개념 교정에 청크 ID가 붙어 있습니다."
+      }
+    },
+    {
+      "id": "B-8",
+      "label": "misconception",
+      "topCosine": 0.8377927169500272,
+      "band": "안",
+      "refused": false,
+      "achieved": false,
+      "downgraded": 0,
+      "states": [
+        "RB-B1:이해",
+        "RB-B2:미도달",
+        "RB-B3:이해",
+        "RB-B4:미도달",
+        "RB-B5:미도달"
+      ],
+      "misconceptions": [
+        "width 300에 패딩 20과 테두리 5, 그리고 바깥 여백까지 다 더해서 박스의 크기가 정해집니다."
+      ],
+      "judge": {
+        "grounded": true,
+        "cited": true,
+        "refusal": false,
+        "relevant": true,
+        "complete": true,
+        "verdict": "pass",
+        "reason": "진단기가 클라이언트를 `이해`로 주었으나 학습자 발화에 주체가 없어 근거가 부족합니다"
+      }
+    },
+    {
+      "id": "B-9",
+      "label": "outofscope",
+      "topCosine": 0.5612000437814867,
+      "band": "밖",
+      "refused": true,
+      "achieved": false,
+      "downgraded": 0,
+      "judge": null
+    }
+  ]
+}

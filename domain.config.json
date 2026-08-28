@@ -1,0 +1,53 @@
+{
+  "$comment": "도메인 설정. 지식 원본은 data/source.md, 판정 기준은 data/rubrics/*.json 이다. 둘은 역할이 다르다(PRD 7장).",
+  "id": "mindi",
+  "chunkIdPrefix": "MD",
+  "brand": {
+    "title": "Mindi",
+    "tagline": "MDN을 읽고, 진짜 이해했는지 확인해주는 웹 학습 친구",
+    "emoji": "🌱"
+  },
+  "intro": {
+    "what": "읽으면 알 것 같은데 막상 설명하려면 막히죠. Mindi는 여러분이 자기 말로 설명해 보게 하고, 무엇이 비었는지만 짚어 줍니다.",
+    "who": "웹 개발을 처음 배우는 사람",
+    "scope": "지금은 HTTP와 CSS 박스 모델을 다룹니다. 근거는 MDN 문서입니다.",
+    "outOfScope": "그 밖의 것은 아는 척하지 않고 모른다고 말합니다."
+  },
+  "sampleQuestions": [],
+  "refusalPolicy": "제공된 자료에서 근거를 찾을 수 없으면 추측하지 말고, 자료 범위 밖이라는 사실을 밝힌 뒤 답할 수 없다고 안내하세요. 근거가 약할 때는 단정하지 말고 자료의 한계를 함께 말하세요.",
+  "retrieval": {
+    "$comment": "scope 는 F8 범위 판정 구간. 14건 탐침 실측(npm run probe)으로 정했다. 자료 안 최저 0.705, 경계 0.573~0.640, 자료 밖 최고 0.553. 단일 임계값은 경계를 처리할 수 없어, 원칙 7(저확신 시 단정하지 않고 확인 질문)을 범위 판정에도 적용했다.",
+    "topK": 5,
+    "rrfK": 60,
+    "scope": {
+      "accept": 0.65,
+      "ask": 0.58
+    },
+    "weakEvidenceThreshold": 0.65
+  },
+  "embedding": {
+    "modelId": "onnx-community/embeddinggemma-300m-ONNX",
+    "modelFileName": "model_no_gather_q4",
+    "dim": 768,
+    "queryPrefix": "task: search result | query: ",
+    "documentPrefixTemplate": "title: {section} | text: "
+  },
+  "ollama": {
+    "baseUrl": "http://localhost:11434",
+    "defaultModel": "qwen3:4b",
+    "suggestedModels": [
+      "qwen3:4b",
+      "qwen3.5:2b",
+      "gemma3:4b",
+      "llama3.2:3b"
+    ]
+  },
+  "concepts": [
+    "http",
+    "box-model"
+  ],
+  "hints": {
+    "maxRetries": 3,
+    "$comment": "PRD F4 종료 조건. 3회 재설명 후에도 미도달이면 정답 요약 후 소진 종료."
+  }
+}
