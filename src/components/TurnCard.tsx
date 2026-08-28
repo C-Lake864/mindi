@@ -24,7 +24,13 @@ export function TurnCard({ turn, rubric }: { turn: Turn; rubric: Rubric }) {
     <article className="card turn">
       <p className="said">{turn.input}</p>
 
-      {turn.error && <div className="error-banner">{turn.error}</div>}
+      {turn.error && (
+        <div className="trouble">
+          <strong>잠깐, 연결이 안 돼요</strong>
+          <p>{turn.error}</p>
+          <p className="hint">고치고 나서 방금 쓰신 설명을 다시 보내 주세요.</p>
+        </div>
+      )}
 
       {d && (
         <div className="report">

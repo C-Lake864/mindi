@@ -1006,3 +1006,28 @@ details.fold.example .fold-body {
   color: var(--muted);
 }
 
+
+/* 연결 문제 안내. 원인만 말하는 빨간 상자 대신, 할 일이 보이는 카드로. */
+.trouble {
+  background: var(--warn-soft);
+  border: 1px solid color-mix(in srgb, var(--warn) 40%, transparent);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.trouble strong {
+  display: block;
+  color: var(--warn);
+  margin-bottom: 8px;
+}
+
+.trouble p {
+  margin: 0 0 8px;
+  white-space: pre-wrap;
+  line-height: 1.7;
+  font-size: 0.92rem;
+}
+
+.trouble p:last-child {
+  margin-bottom: 0;
+}

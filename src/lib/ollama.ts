@@ -53,6 +53,50 @@ function withThinkingSwitch(model: string, user: string): string {
   return /qwen3/i.test(model) ? `${user}\n\n/no_think` : user;
 }
 
+/**
+ * 연결이 왜 안 되는지 가른다.
+ *
+ * 브라우저는 CORS 로 막힌 요청과 서버가 꺼져 있는 요청을 똑같이
+ * TypeError("Failed to fetch") 로 돌려준다. 사용자에게는 완전히 다른 상황인데
+ * 화면에는 같은 말이 뜬다.
+ *
+ * `mode: "no-cors"` 로 한 번 더 두드려 보면 갈린다. 서버가 살아 있으면
+ * 불투명 응답이 돌아오고(성공), 꺼져 있으면 그때는 진짜로 던진다.
+ */
+export type ConnectionProblem = "cors" | "down";
+
+export async function diagnoseConnection(baseUrl = domain.ollama.baseUrl): Promise<ConnectionProblem> {
+  try {
+    await fetch(`${baseUrl}/api/tags`, { mode: "no-cors", signal: AbortSignal.timeout(4000) });
+    return "cors";
+  } catch {
+    return "down";
+  }
+}
+
+/** 무엇을 해야 하는지까지 적는다. 원인만 알려 주는 오류는 쓸모가 없다. */
+export function connectionHelp(problem: ConnectionProblem, model: string): string {
+  const origin = location.origin;
+  if (problem === "down") {
+    return [
+      "Ollama가 실행되고 있지 않은 것 같아요.",
+      "",
+      `Ollama를 켜고 \`ollama pull ${model}\` 로 모델을 받아 두세요.`,
+      "켜져 있는데도 이 말이 나오면 방화벽이 11434 포트를 막고 있는지 봐 주세요.",
+    ].join("\n");
+  }
+  return [
+    "Ollama는 켜져 있는데, 이 페이지에서 부르는 것을 아직 허용하지 않았어요.",
+    "",
+    `Ollama가 ${origin} 주소를 허용하도록 아래를 실행해 주세요.`,
+    "",
+    `    setx OLLAMA_ORIGINS "${origin}"`,
+    "",
+    "그다음 Ollama를 완전히 종료했다가 다시 실행해야 반영됩니다.",
+    "(작업 표시줄 아이콘 오른쪽 클릭 → Quit)",
+  ].join("\n");
+}
+
 export type ChatArgs = {
   baseUrl?: string;
   model: string;
@@ -77,22 +121,30 @@ export async function ollamaChat({
   json = false,
   temperature = 0.2,
 }: ChatArgs): Promise<string> {
-  const res = await fetch(`${baseUrl}/api/chat`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    signal,
-    body: JSON.stringify({
-      model,
-      stream: true,
-      think: false, // 이 옵션을 지키는 빌드에서는 여기서 끝난다
-      ...(json ? { format: "json" } : {}),
-      options: { temperature },
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: withThinkingSwitch(model, user) },
-      ],
-    }),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${baseUrl}/api/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal,
+      body: JSON.stringify({
+        model,
+        stream: true,
+        think: false, // 이 옵션을 지키는 빌드에서는 여기서 끝난다
+        ...(json ? { format: "json" } : {}),
+        options: { temperature },
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: withThinkingSwitch(model, user) },
+        ],
+      }),
+    });
+  } catch (e) {
+    // 취소는 오류가 아니다. 그대로 올려 보낸다.
+    if (e instanceof DOMException && e.name === "AbortError") throw e;
+    // "Failed to fetch" 를 그대로 보여 주면 사용자는 할 수 있는 일이 없다.
+    throw new Error(connectionHelp(await diagnoseConnection(baseUrl), model));
+  }
 
   if (!res.ok || !res.body) {
     const body = await res.text().catch(() => "");

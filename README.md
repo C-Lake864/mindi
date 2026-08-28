@@ -30,14 +30,18 @@ ollama pull qwen3:4b
 
 진행률이 왼쪽 **설정과 기록**에 표시됩니다. 한 번 받으면 브라우저 캐시에 남습니다. ONNX 런타임(WASM) 자산도 함께 받으므로 첫 로드는 시간이 걸립니다.
 
-### ④ 배포 주소에서 호출하려면 CORS를 허용해야 합니다
+### ④ 배포 주소에서 호출하려면 CORS를 허용해야 합니다 — 안 하면 반드시 실패합니다
+
+이 단계를 건너뛰면 화면에 답이 안 나옵니다. 로컬(`localhost:5173`)에서는 Ollama가 기본으로 허용하므로 잘 되다가, 배포 주소에서만 막힙니다.
 
 ```bash
-setx OLLAMA_ORIGINS "*"
+setx OLLAMA_ORIGINS "https://내계정.github.io"
 ```
 
 Windows에서는 위 명령 후 **Ollama를 완전히 종료했다가 다시 실행**해야 반영됩니다.
-(macOS/Linux는 `launchctl setenv OLLAMA_ORIGINS "*"` 또는 `OLLAMA_ORIGINS="*" ollama serve`)
+(작업 표시줄 아이콘 오른쪽 클릭 → Quit. macOS/Linux는 `launchctl setenv OLLAMA_ORIGINS "..."` 또는 `OLLAMA_ORIGINS="..." ollama serve`)
+
+설정하지 않으면 Ollama가 preflight 요청에 **403**을 돌려줍니다. 앱은 이 상황을 감지해 무엇을 해야 하는지 화면에 적어 줍니다.
 
 ### ⑤ 개념을 고르고 시작합니다
 
@@ -318,6 +322,35 @@ npm run dev
 **루브릭 v1.0.0 → v1.1.0.** 질문이 개념 서술로 바뀌면서 `RB-B3`·`RB-B4` 의 판정 기준에서 스니펫 숫자 의존을 뺐습니다.
 
 **5차 측정** — 전 지표 통과 유지. **과잉 인정이 3칸 → 1칸**으로 줄었습니다. 질문이 개념을 물으니 답변도 개념을 말하고, 진단기가 문맥으로 채워 넣을 자리가 줄었습니다.
+
+### 실험 8 — 배포 환경에서만 나는 오류
+
+배포본에서 답변을 제출하니 붉은 상자에 **`Failed to fetch`** 만 떴습니다.
+
+**원인**: `OLLAMA_ORIGINS` 미설정. 실측했습니다.
+
+| 시험 | 결과 |
+| --- | --- |
+| 배포 출처 → 설정 안 한 Ollama (preflight) | **403 Forbidden** |
+| 배포 출처 → `OLLAMA_ORIGINS` 준 Ollama | **204**, `Access-Control-Allow-Origin` 정상 |
+
+로컬 개발 주소는 Ollama가 기본으로 허용하기 때문에, **로컬에서는 끝까지 잘 되다가 배포에서만 깨집니다.** README에 적어만 두고 실제로 이 경로를 밟아 보지 않아 발견이 늦었습니다.
+
+**진짜 결함은 오류 메시지였습니다.** `Failed to fetch` 는 사용자가 할 수 있는 일이 하나도 없는 문장입니다. 게다가 브라우저는 **CORS 차단과 서버 꺼짐을 똑같은 문구로** 돌려주는데, 둘은 사용자가 할 일이 완전히 다릅니다.
+
+`mode: "no-cors"` 로 한 번 더 두드려 보면 갈립니다. 서버가 살아 있으면 불투명 응답이 돌아오고, 꺼져 있으면 그때는 진짜로 던집니다.
+
+| 상황 | 일반 fetch | 판별 |
+| --- | --- | --- |
+| 살아있고 CORS 허용 | ok | — |
+| 살아있지만 CORS 거부 | `Failed to fetch` | **cors** |
+| 포트가 죽음 | `Failed to fetch` | **down** |
+
+이제 상황에 맞는 안내가 나옵니다. CORS면 **현재 페이지 주소를 넣은 `setx` 명령을 그대로** 보여 주고, 꺼짐이면 Ollama 실행과 `ollama pull` 을 안내합니다.
+
+**아직 확인하지 못한 것**: Ollama 응답에 `Access-Control-Allow-Private-Network` 헤더가 **없습니다**(두 경우 모두 확인). 브라우저가 Private Network Access 를 강제하는 설정이라면 `OLLAMA_ORIGINS` 를 맞춰도 https 페이지에서 `http://localhost` 호출이 막힐 수 있습니다. 배포본을 내려서 실제 https 출처로 끝까지 확인하지 못했습니다. **추정으로 적지 않고 미확인으로 남깁니다.**
+
+**결정: 채택.** 문서에 적어 두는 것과 그 경로를 실제로 밟아 보는 것은 다릅니다.
 
 ### 실험 기록 양식 (다음 실험은 여기에)
 
