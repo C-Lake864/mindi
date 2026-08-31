@@ -1106,3 +1106,48 @@ details.fold.example .fold-body {
 .card.downloading {
   border-color: var(--accent);
 }
+
+/* 이의 제기 — 판정이 틀릴 수 있으므로 아니라고 말할 자리 */
+.el-row {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.el-row .el-name {
+  flex: 1;
+}
+
+.el-row .linky {
+  flex: none;
+  font-size: 0.8rem;
+}
+
+.appeal-box {
+  margin: 6px 0 4px 1.6em;
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+.appeal-box textarea {
+  flex: 1;
+  font-size: 0.88rem;
+}
+
+.appeal-said {
+  margin: 6px 0 4px 1.6em;
+  font-size: 0.86rem;
+  padding: 7px 10px;
+  border-radius: 8px;
+}
+
+.appeal-said.ok {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.appeal-said.no {
+  background: var(--surface-2);
+  color: var(--muted);
+}

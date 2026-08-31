@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Judgement, Rubric, Turn } from "../lib/types";
 import { elementById } from "../lib/rubric";
+import { MAX_APPEALS_PER_TURN } from "../lib/appeal";
 
 /* ── 보여 주되, 먼저 들이밀지 않는다 ──────────────────────────────────
    출처와 자동 판정을 한 번 화면에서 뺐다가 되살렸다.
@@ -30,12 +31,19 @@ export function TurnCard({
   turn,
   rubric,
   onFeedback,
+  onAppeal,
+  appealing,
 }: {
   turn: Turn;
   rubric: Rubric;
   onFeedback: (id: string, value: "up" | "down") => void;
+  onAppeal: (turnId: string, elementId: string, rebuttal: string) => void;
+  appealing: string | null;
 }) {
   const [open, setOpen] = useState(false);
+  // 이의를 쓰는 중인 요소. 한 번에 하나만 연다.
+  const [arguing, setArguing] = useState<string | null>(null);
+  const [rebuttal, setRebuttal] = useState("");
   const d = turn.diagnosis;
   const j = turn.judge;
 
@@ -75,13 +83,53 @@ export function TurnCard({
             <ul className="element-list">
               {required.map((e) => {
                 const el = elementById(rubric, e.elementId);
+                const said = turn.appeals.find((a) => a.elementId === e.elementId);
+                const 남음 = turn.appeals.length < MAX_APPEALS_PER_TURN;
                 return (
                   <li key={e.elementId} className={`st-${e.state}`}>
-                    <span className="st">{e.state === "이해" ? "✓" : "·"}</span>
-                    <span>
-                      {el?.name}
-                      {e.evidence && <em> “{e.evidence}”</em>}
-                    </span>
+                    <div className="el-row">
+                      <span className="st">{e.state === "이해" ? "✓" : "·"}</span>
+                      <span className="el-name">
+                        {el?.name}
+                        {e.evidence && <em> “{e.evidence}”</em>}
+                      </span>
+                      {/* 진단이 틀릴 수 있다. 아니라고 말할 자리를 둔다 (PRD 원칙 8) */}
+                      {e.state !== "이해" && !said && 남음 && (
+                        <button
+                          className="linky"
+                          onClick={() => {
+                            setArguing(arguing === e.elementId ? null : e.elementId);
+                            setRebuttal("");
+                          }}
+                        >
+                          이건 말했는데요
+                        </button>
+                      )}
+                    </div>
+
+                    {arguing === e.elementId && !said && (
+                      <div className="appeal-box">
+                        <textarea
+                          rows={2}
+                          value={rebuttal}
+                          placeholder="어느 부분에서 그 얘기를 하셨는지 알려 주세요"
+                          onChange={(ev) => setRebuttal(ev.target.value)}
+                        />
+                        <button
+                          className="ghost small"
+                          disabled={!rebuttal.trim() || appealing === e.elementId}
+                          onClick={() => onAppeal(turn.id, e.elementId, rebuttal.trim())}
+                        >
+                          {appealing === e.elementId ? "다시 보는 중…" : "다시 봐 주세요"}
+                        </button>
+                      </div>
+                    )}
+
+                    {said && (
+                      <p className={`appeal-said ${said.accepted ? "ok" : "no"}`}>
+                        {said.reason}
+                      </p>
+                    )}
                   </li>
                 );
               })}
@@ -102,6 +150,13 @@ export function TurnCard({
                 </p>
               ))}
             </div>
+          )}
+
+          {open && turn.appeals.length >= MAX_APPEALS_PER_TURN && (
+            <p className="hint" style={{ marginLeft: "1.6em" }}>
+              이의는 한 번에 {MAX_APPEALS_PER_TURN}개까지 봐 드려요. 나머지는 다시 설명해 주시면
+              새로 봅니다.
+            </p>
           )}
 
           {nextEl && turn.kind !== "summary" && (

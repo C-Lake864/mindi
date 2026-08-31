@@ -4,7 +4,7 @@ import { embedQuery, type LoadProgress } from "./lib/embedder";
 import { buildBm25, hybridSearch } from "./lib/search";
 import { checkOllama, ollamaChat, type OllamaStatus } from "./lib/ollama";
 import { geminiChat } from "./lib/gemini";
-import { getRubric, RUBRICS, unmetRequired } from "./lib/rubric";
+import { elementById, getRubric, isAchieved, RUBRICS, unmetRequired } from "./lib/rubric";
 import { checkScope } from "./lib/scope";
 import {
   attachCorrections,
@@ -25,6 +25,7 @@ import {
   disciplinedHint,
 } from "./lib/hint";
 import { buildJudgeUser, JUDGE_SYSTEM, parseJudgement } from "./lib/judge";
+import { buildAppealSystem, buildAppealUser, parseAppeal, MAX_APPEALS_PER_TURN } from "./lib/appeal";
 import { confirmMessage, refusalMessage } from "./lib/messages";
 import { decideNext, newSession, MAX_RETRIES } from "./lib/session";
 import { upsertLog } from "./lib/feedback";
@@ -65,6 +66,7 @@ export default function App() {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [thinking, setThinking] = useState("");
+  const [appealing, setAppealing] = useState<string | null>(null);
 
   const abortRef = useRef<AbortController | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
@@ -153,6 +155,7 @@ export default function App() {
         judge: null,
         judgeState: "idle",
         feedback: null,
+        appeals: [],
         error: null,
         streaming: false,
         engine,
@@ -293,6 +296,7 @@ export default function App() {
           states: (finished.diagnosis?.elements ?? []).map((e) => `${e.elementId}:${e.state}`),
           misconceptions: (finished.diagnosis?.misconceptions ?? []).map((m) => m.quote),
           judge: finished.judge,
+          appeals: [],
           engine,
           model: engine === "ollama" ? model : "gemini-2.5-flash",
           feedback: null,
@@ -337,6 +341,7 @@ export default function App() {
               states: (t.diagnosis?.elements ?? []).map((e) => `${e.elementId}:${e.state}`),
               misconceptions: (t.diagnosis?.misconceptions ?? []).map((m) => m.quote),
               judge: t.judge,
+              appeals: t.appeals,
               engine: t.engine,
               model: t.model,
               feedback,
@@ -348,6 +353,89 @@ export default function App() {
       });
     },
     [],
+  );
+
+  /**
+   * 이의 제기 (PRD 원칙 8, F1).
+   *
+   * 받아들이면 그 요소만 `이해`로 고치고, 그 결과 필수가 다 차면 달성으로 끝낸다.
+   * 받아들여진 이의는 루브릭이 모호했다는 증거이므로 기록에 함께 남긴다.
+   */
+  const appeal = useCallback(
+    async (turnId: string, elementId: string, rebuttal: string) => {
+      if (!session || !rubric || appealing) return;
+      const turn = session.turns.find((t) => t.id === turnId);
+      const el = elementById(rubric, elementId);
+      const verdict = turn?.diagnosis?.elements.find((e) => e.elementId === elementId);
+      if (!turn || !el || !verdict) return;
+      // 상한을 코드에서도 막는다. 화면만 감추면 우회할 수 있다.
+      if (turn.appeals.length >= MAX_APPEALS_PER_TURN) return;
+
+      setAppealing(elementId);
+      const controller = new AbortController();
+      try {
+        const outcome = parseAppeal(
+          await run(
+            buildAppealSystem(rubric, el),
+            buildAppealUser(turn.input, rebuttal, verdict.state),
+            controller.signal,
+          ),
+          turn.input,
+        );
+
+        const record = { elementId, rebuttal, ...outcome, at: new Date().toISOString() };
+
+        setSession((s) => {
+          if (!s) return s;
+          const turns = s.turns.map((t) => {
+            if (t.id !== turnId) return t;
+            const appeals = [...t.appeals, record];
+            if (!outcome.accepted || !t.diagnosis) return { ...t, appeals };
+            const diagnosis = {
+              ...t.diagnosis,
+              elements: t.diagnosis.elements.map((e) =>
+                e.elementId === elementId
+                  ? {
+                      ...e,
+                      state: "이해" as const,
+                      evidence: outcome.quote,
+                      reason: "이의를 받아들여 고쳤습니다.",
+                    }
+                  : e,
+              ),
+            };
+            return { ...t, appeals, diagnosis };
+          });
+
+          const latest = turns.filter((t) => t.diagnosis).pop()?.diagnosis ?? s.latest;
+          const next = { ...s, turns, latest };
+          if (!s.ending && isAchieved(rubric, latest)) next.ending = "achieved";
+          return next;
+        });
+
+        upsertLog({
+          id: turn.id,
+          at: turn.createdAt,
+          rubricId: rubric.id,
+          rubricVersion: rubric.version,
+          kind: turn.kind,
+          input: turn.input,
+          attempt: turn.attempt,
+          topCosine: turn.scope?.topCosine ?? 0,
+          band: turn.scope?.band ?? "안",
+          states: (turn.diagnosis?.elements ?? []).map((e) => `${e.elementId}:${e.state}`),
+          misconceptions: (turn.diagnosis?.misconceptions ?? []).map((m) => m.quote),
+          judge: turn.judge,
+          appeals: [...turn.appeals, record],
+          engine: turn.engine,
+          model: turn.model,
+          feedback: turn.feedback,
+        });
+      } finally {
+        setAppealing(null);
+      }
+    },
+    [session, rubric, appealing, run],
   );
 
   const start = (rubricId: string, go: Stage) => {
@@ -461,7 +549,14 @@ export default function App() {
                 </article>
 
                 {session.turns.map((t) => (
-                  <TurnCard key={t.id} turn={t} rubric={rubric} onFeedback={rate} />
+                  <TurnCard
+                    key={t.id}
+                    turn={t}
+                    rubric={rubric}
+                    onFeedback={rate}
+                    onAppeal={appeal}
+                    appealing={appealing}
+                  />
                 ))}
 
                 {thinking && (

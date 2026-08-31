@@ -123,6 +123,25 @@ export type Judgement = {
 
 export type Feedback = "up" | "down" | null;
 
+/**
+ * 이의 한 건 (PRD 원칙 8).
+ *
+ * 받아들여진 이의는 곧 **루브릭이 모호했다는 증거**다. 판정만 고치고 지나가면
+ * 같은 곳에서 계속 걸린다. 그래서 기록에 남겨 루브릭 개선의 재료로 쓴다.
+ */
+export type Appeal = {
+  elementId: string;
+  /** 학습자의 해명 */
+  rebuttal: string;
+  accepted: boolean;
+  reason: string;
+  /** 받아들였을 때 근거가 된 원래 발화 구간 */
+  quote: string;
+  /** 모델은 받아들이려 했으나 코드가 되돌린 경우의 사유 */
+  overturned: string | null;
+  at: string;
+};
+
 /* ── 대화 상태 ─────────────────────────────────────────────────────── */
 
 export type ScopeBand = "안" | "확인" | "밖";
@@ -158,6 +177,8 @@ export type Turn = {
   judgeState: "idle" | "running" | "done" | "error";
   /** 사람 피드백. 자동 판정과 나란히 기록에 남는다 */
   feedback: Feedback;
+  /** 이 턴의 판정에 제기된 이의들 */
+  appeals: Appeal[];
 
   error: string | null;
   streaming: boolean;

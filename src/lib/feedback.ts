@@ -1,4 +1,4 @@
-import type { Feedback, Judgement, ScopeBand, TurnKind } from "./types";
+import type { Appeal, Feedback, Judgement, ScopeBand, TurnKind } from "./types";
 
 const STORAGE = "webcheck.log.v1";
 
@@ -22,6 +22,8 @@ export type LogEntry = {
   states: string[];
   misconceptions: string[];
   judge: Judgement | null;
+  /** 이의 제기 기록. 받아들여진 이의는 루브릭 개선의 재료다 */
+  appeals: Appeal[];
   engine: string;
   model: string;
   feedback: Feedback;
@@ -61,6 +63,50 @@ export function clearLog() {
 }
 
 const mark = (b: boolean | undefined) => (b === undefined ? "-" : b ? "O" : "X");
+/** 표 안에서 칸을 깨뜨리는 글자를 눕힌다. */
+const esc = (t: string) => t.replace(/\|/g, "\\|").replace(/\s+/g, " ");
+
+/**
+ * 루브릭 개선 로그.
+ *
+ * 받아들여진 이의가 모이는 요소는 판정 기준이 모호하다는 뜻이다.
+ * 프롬프트가 아니라 루브릭을 먼저 고치라는 신호로 읽는다 (PRD 6.4 원칙 5).
+ */
+export function appealLog(entries: LogEntry[]): string {
+  const rows = entries.flatMap((e) =>
+    (e.appeals ?? []).map((a) => ({ ...a, rubricId: e.rubricId, input: e.input })),
+  );
+  if (rows.length === 0) return "이의 제기 기록이 없습니다.";
+
+  const byElement = new Map<string, { ok: number; no: number }>();
+  for (const r of rows) {
+    const k = `${r.rubricId}/${r.elementId}`;
+    const c = byElement.get(k) ?? { ok: 0, no: 0 };
+    if (r.accepted) c.ok++;
+    else c.no++;
+    byElement.set(k, c);
+  }
+
+  const summary = [
+    "| 요소 | 받아들임 | 기각 | 읽는 법 |",
+    "| --- | --- | --- | --- |",
+    ...[...byElement.entries()].map(([k, c]) =>
+      `| ${k} | ${c.ok} | ${c.no} | ${c.ok >= 2 ? "**판정 기준이 모호할 수 있음 — 루브릭 검토**" : "-"} |`,
+    ),
+  ];
+
+  const detail = [
+    "",
+    "| 요소 | 학습자 해명 | 결과 | 사유 |",
+    "| --- | --- | --- | --- |",
+    ...rows.map(
+      (r) =>
+        `| ${r.elementId} | ${esc(r.rebuttal).slice(0, 40)} | ${r.accepted ? "받아들임" : "기각"}${r.overturned ? " (코드가 되돌림)" : ""} | ${esc(r.reason).slice(0, 50)} |`,
+    ),
+  ];
+
+  return [...summary, ...detail].join("\n");
+}
 
 /** README 실험 절에 그대로 붙일 수 있는 표. */
 export function toMarkdown(entries: LogEntry[]): string {

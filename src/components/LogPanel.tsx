@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { clearLog, readLog, toMarkdown } from "../lib/feedback";
+import { appealLog, clearLog, readLog, toMarkdown } from "../lib/feedback";
 
 /**
  * 실험 기록 패널.
@@ -21,6 +21,9 @@ export function LogPanel() {
       <div className="chips">
         <button className="chip" onClick={() => setMarkdown(toMarkdown(readLog()))}>
           표로 뽑기
+        </button>
+        <button className="chip" onClick={() => setMarkdown(appealLog(readLog()))}>
+          이의 기록
         </button>
         <button
           className="chip"
