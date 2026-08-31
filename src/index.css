@@ -1031,3 +1031,78 @@ details.fold.example .fold-body {
 .trouble p:last-child {
   margin-bottom: 0;
 }
+
+/* 답변 뒤에 따라오는 것들 — 접혀 있다가 필요할 때 열린다 */
+.aftermath {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+}
+
+.aftermath details.fold.small {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.aftermath details.fold + details.fold {
+  margin-top: 6px;
+}
+
+.verdict-word {
+  font-size: 0.85em;
+}
+
+.judge-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.88rem;
+}
+
+.judge-list li {
+  display: flex;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.judge-list li > span {
+  width: 1em;
+  font-family: var(--mono);
+}
+
+.judge-list li.yes > span {
+  color: var(--ok);
+}
+
+.judge-list li.no > span {
+  color: var(--muted);
+}
+
+.rate {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.rate button {
+  border: 1px solid var(--border);
+  background: transparent;
+  border-radius: 8px;
+  padding: 2px 10px;
+  font-size: 0.9rem;
+}
+
+.rate button:hover {
+  border-color: var(--accent);
+}
+
+.rate button.on {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.card.downloading {
+  border-color: var(--accent);
+}

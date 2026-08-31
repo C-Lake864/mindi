@@ -1,6 +1,6 @@
 import { domain } from "../config/domain";
 import { RUBRICS } from "./rubric";
-import type { Chunk, Rubric, ScopeCheck, VectorStore } from "./types";
+import type { Chunk, RetrievalResult, Rubric, ScopeCheck, VectorStore } from "./types";
 
 /**
  * 거절·확인·원문 요약은 모델을 거치지 않고 만든다.
@@ -81,4 +81,17 @@ export function sourceSummary(
   }
 
   return { chunks, sections };
+}
+
+/**
+ * 청크를 프롬프트에 싣는 형식.
+ *
+ * 본문만 넘기면 모델이 무엇을 근거로 삼았는지 되짚을 수 없다. ID 와 함께
+ * 섹션과 출처 주소까지 실어 보내, 교정 문장이 어느 문단에서 나왔는지
+ * 화면까지 이어지게 한다. (과제 요구: ID·URL·섹션 정보를 잃지 않고 전달)
+ */
+export function evidenceBlock(retrieval: RetrievalResult): string {
+  return retrieval.hits
+    .map((h) => `[${h.chunk.id}] (${h.chunk.section} · ${h.chunk.url})\n${h.chunk.text}`)
+    .join("\n\n");
 }

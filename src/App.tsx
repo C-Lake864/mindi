@@ -21,6 +21,7 @@ import {
   buildSummarySystem,
   buildSummaryUser,
   parseText,
+  partialText,
 } from "./lib/hint";
 import { buildJudgeUser, JUDGE_SYSTEM, parseJudgement } from "./lib/judge";
 import { confirmMessage, refusalMessage } from "./lib/messages";
@@ -112,10 +113,12 @@ export default function App() {
    * 유일하게 확실한 방법이라 스트리밍을 포기했다 (hint.ts 주석 참고).
    */
   const run = useCallback(
-    (system: string, user: string, signal: AbortSignal) =>
-      engine === "ollama"
-        ? ollamaChat({ model, system, user, json: true, signal, onText: () => {}, temperature: 0 })
-        : geminiChat({ system, user, json: true, signal, onText: () => {} }),
+    (system: string, user: string, signal: AbortSignal, onText?: (raw: string) => void) => {
+      const sink = onText ?? (() => {});
+      return engine === "ollama"
+        ? ollamaChat({ model, system, user, json: true, signal, onText: sink, temperature: 0 })
+        : geminiChat({ system, user, json: true, signal, onText: sink });
+    },
     [engine, model],
   );
 
@@ -148,6 +151,7 @@ export default function App() {
         hintLevel: 0,
         judge: null,
         judgeState: "idle",
+        feedback: null,
         error: null,
         streaming: false,
         engine,
@@ -210,13 +214,14 @@ export default function App() {
             message = step.question;
           } else if (step.kind === "hint") {
             kind = "hint";
-            settle({ hintLevel: step.level });
-            setThinking("힌트를 고르는 중…");
+            settle({ kind, hintLevel: step.level, streaming: true });
+            setThinking("");
             message = parseText(
               await run(
                 buildHintSystem(rubric, step.target, step.level),
                 buildHintUser(text, step.target, step.level, retrieval, rubric),
                 controller.signal,
+                (raw) => patch(id, { message: partialText(raw, "hint") }),
               ),
               "hint",
             );
@@ -225,18 +230,20 @@ export default function App() {
               "필수 요소는 모두 말씀하셨어요. 다만 위에 짚어 드린 부분만 고쳐서 다시 설명해 주세요.";
           } else if (step.kind === "summary") {
             kind = "summary";
-            setThinking("정리하는 중…");
+            settle({ kind, streaming: true });
+            setThinking("");
             message = parseText(
               await run(
                 buildSummarySystem(rubric, step.unmet),
                 buildSummaryUser(text, retrieval),
                 controller.signal,
+                (raw) => patch(id, { message: partialText(raw, "summary") }),
               ),
               "summary",
             );
           }
 
-          settle({ kind, message });
+          settle({ kind, message, streaming: false });
 
           setSession((s) => {
             if (!s) return s;
@@ -300,6 +307,42 @@ export default function App() {
     [store, bm25, session, rubric, busy, engine, model, run, patch, chunkIds, recheckOllama],
   );
 
+  /** 사람 피드백. 화면과 기록 양쪽에 남긴다. */
+  const rate = useCallback(
+    (id: string, value: "up" | "down") => {
+      setSession((s) => {
+        if (!s) return s;
+        const turns = s.turns.map((t) => {
+          if (t.id !== id) return t;
+          const feedback = t.feedback === value ? null : value;
+          const r = getRubric(s.rubricId);
+          if (r) {
+            upsertLog({
+              id: t.id,
+              at: t.createdAt,
+              rubricId: r.id,
+              rubricVersion: r.version,
+              kind: t.kind,
+              input: t.input,
+              attempt: t.attempt,
+              topCosine: t.scope?.topCosine ?? 0,
+              band: t.scope?.band ?? "안",
+              states: (t.diagnosis?.elements ?? []).map((e) => `${e.elementId}:${e.state}`),
+              misconceptions: (t.diagnosis?.misconceptions ?? []).map((m) => m.quote),
+              judge: t.judge,
+              engine: t.engine,
+              model: t.model,
+              feedback,
+            });
+          }
+          return { ...t, feedback };
+        });
+        return { ...s, turns };
+      });
+    },
+    [],
+  );
+
   const start = (rubricId: string, go: Stage) => {
     setSession(newSession(rubricId));
     setStage(go);
@@ -335,6 +378,20 @@ export default function App() {
                 diagnosis={session.latest}
                 ending={session.ending}
               />
+            )}
+
+            {/* 첫 방문에는 임베딩 모델 200MB 를 받는다. 그동안 아무 반응이 없으면
+                처음 온 사람은 고장 났다고 생각한다. 받는 중일 때만 밖으로 낸다. */}
+            {embedding.status === "downloading" && (
+              <section className="card downloading">
+                <p className="hint" style={{ margin: "0 0 8px" }}>
+                  처음 한 번만 받으면 됩니다 · {Math.round(embedding.progress * 100)}%
+                </p>
+                <div className="progress">
+                  <i style={{ width: `${Math.round(embedding.progress * 100)}%` }} />
+                </div>
+                <p className="hint" style={{ margin: "8px 0 0" }}>{embedding.message}</p>
+              </section>
             )}
 
             {/* 학습에 필요하지 않은 것은 접어 둔다. 화면에 있으면 읽어야 할 것처럼 보인다. */}
@@ -397,7 +454,7 @@ export default function App() {
                 </article>
 
                 {session.turns.map((t) => (
-                  <TurnCard key={t.id} turn={t} rubric={rubric} />
+                  <TurnCard key={t.id} turn={t} rubric={rubric} onFeedback={rate} />
                 ))}
 
                 {thinking && (

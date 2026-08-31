@@ -121,6 +121,8 @@ export type Judgement = {
   reason: string;
 };
 
+export type Feedback = "up" | "down" | null;
+
 /* ── 대화 상태 ─────────────────────────────────────────────────────── */
 
 export type ScopeBand = "안" | "확인" | "밖";
@@ -154,6 +156,8 @@ export type Turn = {
   hintLevel: number;
   judge: Judgement | null;
   judgeState: "idle" | "running" | "done" | "error";
+  /** 사람 피드백. 자동 판정과 나란히 기록에 남는다 */
+  feedback: Feedback;
 
   error: string | null;
   streaming: boolean;
@@ -180,4 +184,3 @@ export type Session = {
   latest: Diagnosis | null;
 };
 
-export type Feedback = "up" | "down" | null;

@@ -1,4 +1,5 @@
 import type { Diagnosis, ElementState, MisconceptionHit, RetrievalResult, Rubric } from "./types";
+import { evidenceBlock } from "./messages";
 
 const STATES: ElementState[] = ["이해", "부분", "확인필요", "미도달"];
 
@@ -108,7 +109,7 @@ export function buildCorrectionUser(
   quotes: { quote: string; why: string }[],
   retrieval: RetrievalResult,
 ): string {
-  const evidence = retrieval.hits.map((h) => `[${h.chunk.id}] ${h.chunk.text}`).join("\n");
+  const evidence = evidenceBlock(retrieval);
   return [
     "<원문>",
     evidence,

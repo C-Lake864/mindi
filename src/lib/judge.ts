@@ -1,5 +1,6 @@
 import type { Diagnosis, Judgement, Rubric, Turn } from "./types";
 import { requiredElements } from "./rubric";
+import { evidenceBlock } from "./messages";
 
 /**
  * 2층 판정 (LLM-as-a-Judge).
@@ -60,9 +61,7 @@ export function buildJudgeUser(turn: Turn, rubric: Rubric): string {
     .map((e) => `- ${e.id} ${e.name}: ${e.criterion}`)
     .join("\n");
 
-  const chunks = (turn.retrieval?.hits ?? [])
-    .map((h) => `[${h.chunk.id}] ${h.chunk.text}`)
-    .join("\n");
+  const chunks = turn.retrieval ? evidenceBlock(turn.retrieval) : "";
 
   const produced =
     turn.kind === "diagnosis" && turn.diagnosis

@@ -1,5 +1,6 @@
 import type { RetrievalResult, Rubric, RubricElement } from "./types";
 import { anchorUrl } from "./rubric";
+import { evidenceBlock } from "./messages";
 
 export type HintLevel = 1 | 2 | 3;
 
@@ -74,7 +75,7 @@ export function buildHintUser(
 
   if (level === 3) {
     // Hint 3 에서만 원문을 넘긴다. 1·2단계에 원문을 주면 반드시 새어 나온다.
-    const evidence = retrieval.hits.map((h) => `[${h.chunk.id}] ${h.chunk.text}`).join("\n");
+    const evidence = evidenceBlock(retrieval);
     parts.push("", "<원문>", evidence, "</원문>", "", `참고 링크: ${anchorUrl(rubric, target.anchor)}`);
   }
 
@@ -113,7 +114,7 @@ export function buildSummarySystem(rubric: Rubric, unmet: RubricElement[]): stri
 }
 
 export function buildSummaryUser(explanation: string, retrieval: RetrievalResult): string {
-  const evidence = retrieval.hits.map((h) => `[${h.chunk.id}] ${h.chunk.text}`).join("\n");
+  const evidence = evidenceBlock(retrieval);
   return [
     `<학습자의 마지막 설명>\n${explanation}\n</학습자의 마지막 설명>`,
     "",
@@ -146,6 +147,42 @@ function humanize(text: string): string {
  * 빈 문자열을 준다. 영어 추론을 화면에 흘리는 것보다 아무것도 안 보여 주는
  * 편이 낫다.
  */
+/**
+ * 아직 다 오지 않은 JSON 에서 값 하나를 꺼낸다.
+ *
+ * 스트리밍과 사고 차단은 양립하지 않는 줄 알았다. 사고를 막는 유일하게
+ * 확실한 방법이 `format:"json"` 인데, 그러면 흘러나오는 것이 JSON 이라
+ * 그대로 보여 줄 수 없기 때문이다.
+ *
+ * 그런데 흘러나오는 JSON 에서 값만 실시간으로 뽑으면 둘 다 된다.
+ * `{"hint": "요청을 보내는 쪽은` 까지 왔으면 `요청을 보내는 쪽은` 을 보여 준다.
+ * 사고가 나올 자리가 없으면서도 글자가 차오르는 것이 보인다.
+ *
+ * (다른 길도 재 봤다. `think:true` 로 보내면 Ollama 가 사고를 thinking 필드로
+ *  분리해 주지만, 두 문장짜리 힌트에 13,000자를 생각한 뒤에야 답이 시작된다.)
+ */
+export function partialText(raw: string, key: string): string {
+  const opener = new RegExp(`"${key}"\\s*:\\s*"`).exec(raw);
+  if (!opener) return "";
+
+  let i = opener.index + opener[0].length;
+  let out = "";
+  while (i < raw.length) {
+    const ch = raw[i];
+    if (ch === "\\") {
+      const next = raw[i + 1];
+      if (next === undefined) break; // 이스케이프의 뒷글자가 아직 안 왔다
+      out += next === "n" ? "\n" : next === "t" ? "\t" : next;
+      i += 2;
+      continue;
+    }
+    if (ch === '"') break; // 값이 끝났다
+    out += ch;
+    i += 1;
+  }
+  return humanize(out);
+}
+
 export function parseText(raw: string, key: string): string {
   const start = raw.indexOf("{");
   const end = raw.lastIndexOf("}");
