@@ -133,10 +133,65 @@ export function buildSummaryUser(explanation: string, retrieval: RetrievalResult
  * 문장 중간은 건드리지 않는다. 어색하게 잘릴 위험이 더 크다.
  */
 function humanize(text: string): string {
+  // 문장 앞뿐 아니라 중간에도 나온다. "여기서 학습자가 아직 닿지 못한 부분은…"
   return text
-    .replace(/(^|[.!?]\s+)학습자(가|는|께서|님이|님은|님께서)\s*/g, "$1")
+    .replace(/학습자(가|는|께서|님이|님은|님께서|를|을|의|에게|에게서)\s*/g, "")
     .replace(/(^|[.!?]\s+)사용자(가|는|께서)\s*/g, "$1")
+    .replace(/\s{2,}/g, " ")
     .trim();
+}
+
+/* ── 힌트 규율을 코드로 지킨다 ─────────────────────────────────────────
+   프롬프트에 세 번 적었는데도 이런 힌트가 나왔다.
+
+     "'클라이언트' 요소에 대한 언급이 없습니다"      ← 1단계에서 이름을 말함
+     "말한 '요청을 보내는 쪽'이 바로 클라이언트예요"   ← 정답을 그대로 줌
+     "예시 문장: '...'"                            ← 금지어를 그대로 씀
+
+   정답 조기 노출은 최적화 대상이 아니라 상한 제약이다(PRD 15.1). 부탁으로
+   지켜지지 않으면 검사해서 되돌린다. 규율을 어긴 힌트는 버리고 정해진
+   문장으로 대신한다. 밋밋하더라도 정답을 흘리는 것보다 낫다.
+   ─────────────────────────────────────────────────────────────── */
+
+const META = [/예시\s*문장/, /요소에\s*대한/, /라고\s*설명/, /바로\s*[「'"“]?/, /강조해야/];
+
+function fallbackHint(target: RubricElement, level: HintLevel, rubric: Rubric): string {
+  if (level === 1) {
+    return "아직 한 가지가 비어 있어요. 누가 무엇을 하는지까지 짚어서 다시 말해 보시겠어요?";
+  }
+  if (level === 2) {
+    return `“${target.name}” 를 떠올려 보세요. 그것이 무엇인지까지 말해 보시면 됩니다.`;
+  }
+  return `원문의 “${target.name}” 부분을 다시 보고 오세요. ${anchorUrl(rubric, target.anchor)}`;
+}
+
+/** 규율을 어긴 힌트인가. 어겼으면 빈 문자열이 아니라 사유를 돌려준다. */
+export function hintViolation(
+  hint: string,
+  target: RubricElement,
+  level: HintLevel,
+): string | null {
+  if (!hint.trim()) return "빈 힌트";
+  if (META.some((re) => re.test(hint))) return "생각 과정이나 금지 표현이 섞임";
+  // 1단계는 요소의 이름을 말하면 안 된다. 이름의 앞부분만 겹쳐도 노출로 본다.
+  if (level === 1) {
+    const core = target.name.replace(/\(.*?\)/g, "").trim();
+    if (core.length > 1 && hint.includes(core)) return `1단계인데 “${core}” 를 말함`;
+  }
+  return null;
+}
+
+export function disciplinedHint(
+  hint: string,
+  target: RubricElement,
+  level: HintLevel,
+  rubric: Rubric,
+): { text: string; violation: string | null } {
+  const violation = hintViolation(hint, target, level);
+  return {
+    text: violation ? fallbackHint(target, level, rubric) : hint,
+    violation,
+  };
 }
 
 /**

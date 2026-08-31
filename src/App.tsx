@@ -22,6 +22,7 @@ import {
   buildSummaryUser,
   parseText,
   partialText,
+  disciplinedHint,
 } from "./lib/hint";
 import { buildJudgeUser, JUDGE_SYSTEM, parseJudgement } from "./lib/judge";
 import { confirmMessage, refusalMessage } from "./lib/messages";
@@ -216,7 +217,7 @@ export default function App() {
             kind = "hint";
             settle({ kind, hintLevel: step.level, streaming: true });
             setThinking("");
-            message = parseText(
+            const rawHint = parseText(
               await run(
                 buildHintSystem(rubric, step.target, step.level),
                 buildHintUser(text, step.target, step.level, retrieval, rubric),
@@ -225,6 +226,12 @@ export default function App() {
               ),
               "hint",
             );
+            // 규율을 어긴 힌트는 화면에 내보내지 않는다. 정답 조기 노출은 상한 제약이다.
+            const checked = disciplinedHint(rawHint, step.target, step.level, rubric);
+            if (checked.violation) {
+              console.warn("힌트 규율 위반, 정해진 문장으로 대체:", checked.violation, rawHint);
+            }
+            message = checked.text;
           } else if (step.kind === "correct") {
             message =
               "필수 요소는 모두 말씀하셨어요. 다만 위에 짚어 드린 부분만 고쳐서 다시 설명해 주세요.";

@@ -92,7 +92,13 @@ export function TurnCard({
             <div className="fixthis">
               {d.misconceptions.map((m, i) => (
                 <p key={i}>
-                  “{m.quote}” — {m.correction}
+                  “{m.quote}” — {m.correction}{" "}
+                  {/* 교정이 어느 문단에서 나왔는지 남긴다. 근거 없는 교정은 애초에 버려진다 */}
+                  {m.chunkIds.map((c) => (
+                    <span className="cite" key={c}>
+                      {c}
+                    </span>
+                  ))}
                 </p>
               ))}
             </div>
