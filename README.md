@@ -6,7 +6,7 @@
 
 서버가 채점하지 않습니다. 브라우저가 임베딩과 검색을 하고, 페이지를 연 사람의 컴퓨터에서 실행 중인 Ollama가 진단을 만듭니다.
 
-- **배포 주소**: `[결정 필요 — GitHub Pages 주소를 여기 적으세요]`
+- **배포 주소**: https://c-lake864.github.io/mindi/
 - **제품 약속**: [PRD.md](PRD.md)
 - **판정 기준**: [data/rubrics/](data/rubrics/) · **지식 원본**: [data/source.md](data/source.md)
 
@@ -28,14 +28,14 @@ ollama pull qwen3:4b
 
 ### ③ 첫 방문에는 임베딩 모델을 내려받습니다 (약 200MB)
 
-진행률이 왼쪽 **설정과 기록**에 표시됩니다. 한 번 받으면 브라우저 캐시에 남습니다. ONNX 런타임(WASM) 자산도 함께 받으므로 첫 로드는 시간이 걸립니다.
+받는 동안 왼쪽에 진행률이 나타납니다(다 받으면 사라집니다). 한 번 받으면 브라우저 캐시에 남습니다. ONNX 런타임(WASM) 자산도 함께 받으므로 첫 로드는 시간이 걸립니다.
 
 ### ④ 배포 주소에서 호출하려면 CORS를 허용해야 합니다 — 안 하면 반드시 실패합니다
 
 이 단계를 건너뛰면 화면에 답이 안 나옵니다. 로컬(`localhost:5173`)에서는 Ollama가 기본으로 허용하므로 잘 되다가, 배포 주소에서만 막힙니다.
 
 ```bash
-setx OLLAMA_ORIGINS "https://내계정.github.io"
+setx OLLAMA_ORIGINS "https://c-lake864.github.io"
 ```
 
 Windows에서는 위 명령 후 **Ollama를 완전히 종료했다가 다시 실행**해야 반영됩니다.
